@@ -1,8 +1,8 @@
-# Basic Chat
+# Basic File Sharing
 
-- P2P basic chat app running in cli terminal
+- P2P basic file sharing app running in cli terminal
 
-- Stack: holepunch, bare, pear, autobase, hyperdb, blind-pairing, hyperswarm, corestore
+- Stack: holepunch, bare, pear, autobase, hyperdb, blind-pairing, hyperswarm, corestore, hyperdrive, localdrive
 
 ## Usage
 
