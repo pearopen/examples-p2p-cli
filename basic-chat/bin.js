@@ -23,17 +23,19 @@ async function main () {
   } = cmd.flags
 
   const store = new Corestore(storage)
-  goodbye(() => store.close(), 20)
-  await store.ready()
-
   const swarm = new Hyperswarm()
   swarm.on('connection', (conn) => store.replicate(conn))
-  goodbye(() => swarm.destroy(), 10)
 
   const room = new ChatRoom(store, swarm, invite)
-  goodbye(() => room.close())
   room.on('update', () => getMessages())
 
+  goodbye(async () => {
+    await room.close()
+    await swarm.destroy()
+    await store.close()
+  })
+
+  await store.ready()
   await room.ready()
   console.log(`Invite: ${await room.getInvite()}`)
   await getMessages()
