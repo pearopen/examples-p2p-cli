@@ -10,10 +10,10 @@
 npm i
 
 # user1: create room + print invite
-npm start -- --storage tmp/user1 --name user1
+npm start -- --storage /tmp/user1 --name user1
 
 # user2: join room
-npm start -- --storage tmp/user2 --name user2 --invite <invite>
+npm start -- --storage /tmp/user2 --name user2 --invite <invite>
 ```
 
 ## Build Pear app
@@ -24,8 +24,8 @@ pear stage <channel>
 pear seed <channel>
 
 # user1: create room + print invite
-pear run <pear-link> --storage tmp/user1 --name user1
+pear run <pear-link> --storage /tmp/user1 --name user1
 
 # user2: join room
-pear run <pear-link> --storage tmp/user2 --name user2 --invite <invite>
+pear run <pear-link> --storage /tmp/user2 --name user2 --invite <invite>
 ```
