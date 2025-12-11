@@ -16,7 +16,7 @@ const cmd = command('basic-file-sharing',
 
 async function main () {
   const {
-    storage = './storage',
+    storage = global.Pear?.app?.storage || './storage',
     invite,
     name = `User ${Date.now()}`
   } = cmd.flags
