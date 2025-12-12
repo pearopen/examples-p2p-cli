@@ -1,0 +1,33 @@
+{
+  "name": "basic-identity",
+  "version": "0.0.1",
+  "description": "Basic Identity",
+  "main": "index.js",
+  "pear": {
+    "type": "terminal",
+    "stage": {
+      "ignore": [
+        ".git",
+        ".github",
+        ".gitignore",
+        "README.md"
+      ]
+    }
+  },
+  "scripts": {
+    "start": "node .",
+    "start:bare": "bare .",
+    "start:pear": "pear run ."
+  },
+  "dependencies": {
+    "compact-encoding": "^2.18.0",
+    "graceful-goodbye": "^1.3.3",
+    "hypercore-crypto": "^3.6.1",
+    "hypercore-id-encoding": "^1.3.0",
+    "hyperdht": "^6.27.1",
+    "keet-identity-key": "^3.1.0",
+    "paparam": "^1.9.1",
+    "protomux-rpc": "^1.8.0",
+    "protomux-rpc-client": "^2.1.0"
+  }
+}
