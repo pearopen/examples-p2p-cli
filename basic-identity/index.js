@@ -28,32 +28,20 @@ async function startServer () {
   const { mnemonic, identity } = await createIdentity()
   console.log(`24 words: ${mnemonic}`)
 
-  const dht = new HyperDHT()
-  const rpcKey = dht.defaultKeyPair.publicKey
-  console.log(`Rpc key: ${idEnc.normalize(rpcKey)}`)
+  const server = createRpcServer((payload) => {
+    try {
+      const message = Buffer.from(payload.message)
+      const messageProof = Buffer.from(payload.messageProof, 'hex')
 
-  const server = dht.createServer()
-  server.on('connection', (conn) => {
-    const rpc = new ProtomuxRPC(conn, { id: rpcKey, valueEncoding: cenc.json })
-    rpc.respond(
-      'verify',
-      async (payload) => {
-        try {
-          const message = Buffer.from(payload.message)
-          const messageProof = Buffer.from(payload.messageProof, 'hex')
-
-          const messageInfo = Identity.verify(messageProof, message)
-          if (!messageInfo) throw new Error('Invalid proof')
-          if (messageInfo.identityPublicKey.toString('hex') !== identity.identityPublicKey.toString('hex')) throw new Error('Invalid identity')
-          return { result: 'Valid identity' }
-        } catch (error) {
-          console.log(error)
-          return { error: `${error}` }
-        }
-      }
-    )
+      const messageInfo = Identity.verify(messageProof, message)
+      if (!messageInfo) throw new Error('Invalid proof')
+      if (messageInfo.identityPublicKey.toString('hex') !== identity.identityPublicKey.toString('hex')) throw new Error('Invalid identity')
+      return { result: 'Valid identity' }
+    } catch (error) {
+      console.log(error)
+      return { error: `${error}` }
+    }
   })
-  goodbye(() => server.close())
   await server.listen()
 }
 
@@ -65,11 +53,8 @@ async function startClient () {
   const message = 'Hello, world!'
   const messageProof = Identity.attestData(Buffer.from(message), deviceKeyPair, deviceProof)
 
-  const dht = new HyperDHT()
-  const client = new ProtomuxRpcClient(dht)
-  const payload = { message, messageProof: messageProof.toString('hex') }
-
-  const { result, error } = await client.makeRequest(rpcKey, 'verify', payload, { requestEncoding: cenc.json, responseEncoding: cenc.json })
+  const client = createRpcClient(rpcKey)
+  const { result, error } = await client.request(message, messageProof)
   if (error) throw new Error(error)
   console.log(result)
 }
@@ -80,6 +65,31 @@ async function createIdentity (mnemonic) {
   const deviceKeyPair = crypto.keyPair()
   const deviceProof = await identity.bootstrap(deviceKeyPair.publicKey)
   return { mnemonic, identity, deviceKeyPair, deviceProof }
+}
+
+function createRpcServer (verifyHandler) {
+  const dht = new HyperDHT()
+  const rpcKey = dht.defaultKeyPair.publicKey
+  console.log(`Rpc key: ${idEnc.normalize(rpcKey)}`)
+
+  const server = dht.createServer()
+  server.on('connection', (conn) => {
+    const rpc = new ProtomuxRPC(conn, { id: rpcKey, valueEncoding: cenc.json })
+    rpc.respond('verify', verifyHandler)
+  })
+  goodbye(() => server.close())
+  return server
+}
+
+function createRpcClient (rpcKey) {
+  const dht = new HyperDHT()
+  const client = new ProtomuxRpcClient(dht)
+  return {
+    request: (message, messageProof) => {
+      const payload = { message, messageProof: messageProof.toString('hex') }
+      return client.makeRequest(rpcKey, 'verify', payload, { requestEncoding: cenc.json, responseEncoding: cenc.json })
+    }
+  }
 }
 
 cmd.parse(global.Pear?.app?.args)
