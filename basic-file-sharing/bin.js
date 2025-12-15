@@ -35,12 +35,13 @@ async function main () {
   })
 
   await store.ready()
+  await room.ready()
+  console.log(`Invite: ${await room.getInvite()}`)
+
   await fs.mkdir(myDrivePath, { recursive: true })
   await fs.mkdir(sharedDrivesPath, { recursive: true })
   console.log(`My drive: ${myDrivePath}`)
   console.log(`Shared drives: ${sharedDrivesPath}`)
-  await room.ready()
-  console.log(`Invite: ${await room.getInvite()}`)
 }
 
 cmd.parse(global.Pear?.app?.args)
