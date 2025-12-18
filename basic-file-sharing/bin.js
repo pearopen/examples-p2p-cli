@@ -11,17 +11,20 @@ const cmd = command('basic-file-sharing',
   flag('--storage|-s <storage>', 'Storage path'),
   flag('--invite|-i <invite>', 'Room invite'),
   flag('--name|-n <name>', 'Your name'),
+  flag('--reset', 'Reset'),
   main
 )
 
 async function main () {
-  const {
-    storage = global.Pear?.app?.storage || './storage',
-    invite,
-    name = `User ${Date.now()}`
-  } = cmd.flags
+  const storage = cmd.flags.storage || global.Pear?.app?.storage || 'storage'
+  const corestorePath = path.join(storage, 'corestore')
+  const invite = cmd.flags.invite
+  const name = cmd.flags.name || `User ${Date.now()}`
+  if (cmd.flags.reset) {
+    await fs.promises.rm(corestorePath, { recursive: true, force: true })
+  }
 
-  const store = new Corestore(path.join(storage, 'store'))
+  const store = new Corestore(corestorePath)
   const swarm = new Hyperswarm()
   swarm.on('connection', (conn) => store.replicate(conn))
   const myDrivePath = path.join(storage, 'my-drive')
@@ -36,12 +39,15 @@ async function main () {
 
   await store.ready()
   await room.ready()
-  console.log(`Invite: ${await room.getInvite()}`)
 
   await fs.mkdir(myDrivePath, { recursive: true })
   await fs.mkdir(sharedDrivesPath, { recursive: true })
-  console.log(`My drive: ${myDrivePath}`)
-  console.log(`Shared drives: ${sharedDrivesPath}`)
+
+  console.log('Storage', storage)
+  console.log('Name', name)
+  console.log('Invite', await room.getInvite())
+  console.log('My drive', myDrivePath)
+  console.log('Shared drives', sharedDrivesPath)
 }
 
 cmd.parse(global.Pear?.app?.args)

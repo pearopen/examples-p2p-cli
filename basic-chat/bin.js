@@ -1,7 +1,9 @@
 const Corestore = require('corestore')
+const fs = require('fs').promises
 const goodbye = require('graceful-goodbye')
 const Hyperswarm = require('hyperswarm')
 const { command, flag } = require('paparam')
+const path = require('path')
 const process = require('process')
 const readline = require('readline')
 const { isNode } = require('which-runtime')
@@ -12,15 +14,17 @@ const cmd = command('basic-chat',
   flag('--storage|-s <storage>', 'Storage path'),
   flag('--invite|-i <invite>', 'Room invite'),
   flag('--name|-n <name>', 'Your name'),
+  flag('--reset', 'Reset'),
   main
 )
 
 async function main () {
-  const {
-    storage = global.Pear?.app?.storage || './storage',
-    invite,
-    name = `User ${Date.now()}`
-  } = cmd.flags
+  const storage = path.join(cmd.flags.storage || global.Pear?.app?.storage || 'storage', 'corestore')
+  const invite = cmd.flags.invite
+  const name = cmd.flags.name || `User ${Date.now()}`
+  if (cmd.flags.reset) {
+    await fs.rm(storage, { recursive: true, force: true })
+  }
 
   const store = new Corestore(storage)
   const swarm = new Hyperswarm()
@@ -37,8 +41,11 @@ async function main () {
 
   await store.ready()
   await room.ready()
-  console.log(`Invite: ${await room.getInvite()}`)
   await getMessages()
+
+  console.log('Storage', storage)
+  console.log('Name', name)
+  console.log('Invite', await room.getInvite())
 
   const rl = readline.createInterface({
     input: process.stdin,
