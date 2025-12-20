@@ -43,11 +43,11 @@ async function main () {
   await fs.mkdir(myDrivePath, { recursive: true })
   await fs.mkdir(sharedDrivesPath, { recursive: true })
 
-  console.log('Storage', storage)
-  console.log('Name', name)
-  console.log('Invite', await room.getInvite())
-  console.log('My drive', myDrivePath)
-  console.log('Shared drives', sharedDrivesPath)
+  console.log(`Storage: ${storage}`)
+  console.log(`Name: ${name}`)
+  console.log(`Invite: ${await room.getInvite()}`)
+  console.log(`My drive: ${myDrivePath}`)
+  console.log(`Shared drives: ${sharedDrivesPath}`)
 }
 
 cmd.parse(global.Pear?.app?.args)

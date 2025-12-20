@@ -43,9 +43,9 @@ async function main () {
   await room.ready()
   await getMessages()
 
-  console.log('Storage', storage)
-  console.log('Name', name)
-  console.log('Invite', await room.getInvite())
+  console.log(`Storage: ${storage}`)
+  console.log(`Name: ${name}`)
+  console.log(`Invite: ${await room.getInvite()}`)
 
   const rl = readline.createInterface({
     input: process.stdin,
